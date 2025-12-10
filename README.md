@@ -249,4 +249,50 @@ int main(){
 }
 ```
 
-## The Explanation
+# Specific Explanation
+
+### main variables
+```
+vector<vector<pair<long, long>>> adjList;
+vector<vector<pair<long, long>>> tables;
+```
+- pair<long, long> represents one edge:
+  ```
+  pair<long, long> = {neighborIndex, weight};
+  ```
+- vector<pair<long, long>> means a list of neighbors for one vertex:
+  ```
+  vector<pair<long,long>> neighbors = { {1, 5}, {4, 12} };
+  ```
+- vector<vector<pair<long, long>>> is the adjacency list for the entire graph:
+  ```
+  vector<vector<pair<long, long>>> adjList = [
+      [ (1,5), (3,10) ],     // neighbors of router 0
+      [ (0,5) ],             // neighbors of router 1
+      [ (5,2), (4,8) ],      // neighbors of router 2
+      ...
+  ]
+
+  ```
+  So:
+      - adjList[0] → all connections from router 0
+      - adjList[0][0] → the first neighbor of router 0, (1, 5)
+      - adjList[0][0].first → 1 (neighbor)
+      - adjList[0][0].second → 5 (weight)
+  However, we manage it differently for the routing table:
+  ```
+  tables[u][v] = { cost_to_v , nextHop_from_u }
+  ```
+  Example: routing table of router id = 0
+  ```
+  tables[0] = [
+        (0,0),  // to 0 self
+        (2,1),  // to 1 cost 2
+        (7,3),  // to 2 cost 7
+        (4,5),  // to 3 cost 4
+        (6,5),  // to 4 cost 6
+        (4,5)   // to 5 cost 4
+  ]
+  ```
+  Why they look structurally different? Because table is always full while    adjList is able to have different spaces
+- a
