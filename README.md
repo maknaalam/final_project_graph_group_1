@@ -335,9 +335,9 @@ Variable p → a parent array from a shortest-path algorithm
 ```
 p[x] = y
 ```
-means: To reach x, you came from y.
+means: To reach x, you came from y. <br>
 Example:
-    ``` bash
+    ```
     p = [0, 0, 1, 2, 3]
     ```
     which: <br>
@@ -347,19 +347,23 @@ Example:
     - ... <br>
     means the path is: 0 → 1 → 2 → 3 → 4 <br>
 What you'll return is the next hop
-```
+
+```cpp
 // -1 (no parent)
 long curr = target;
-while (p[curr] != start && p[curr] != -1) curr = p[curr];
+while (p[curr] != start && p[curr] != -1)
+    curr = p[curr];
 return curr;
 ```
-This loop does:
-    ``` bash
-    curr = target
-    curr = p[target]
-    curr = p[p[target]]
-    curr = p[p[p[target]]]
-    ...
-    ```
-    Because const vector<long>& p act as a reference to the local variable      that the reference get passed on.
 
+This loop does:
+
+```
+curr = target
+curr = p[target]
+curr = p[p[target]]
+curr = p[p[p[target]]]
+...
+```
+
+Because `const vector<long>& p` acts as a reference to the local variable that the reference gets passed on.
