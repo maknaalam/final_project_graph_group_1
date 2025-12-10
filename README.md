@@ -377,3 +377,57 @@ Conditions:
 - If p[curr] = -1 in while (curr != start) → target unreachable
 - If parent adjList met the connection with the child → take the value to check the validity even more before returning the value
 
+### run_bfs
+Prepare arrays for BFS
+```
+vector<long> hops(vertexCount, INF); // for the routing table
+vector<long> p(vertexCount, -1);
+queue<int> q;
+```
+The BFS loop
+1. Take the front node u.
+   ```
+   while(!q.empty()) {
+       int u = q.front(); q.pop();
+   ```
+2. Explore all neighbors of u (v = a neighbor of u):
+   ```
+   for(size_t i=0; i<adjList[u].size(); i++){
+       int v = adjList[u][i].first;
+   ```
+3. Check if this neighbor v should be visited <br>
+   - is_active[v] → router is alive <br>
+   - p[v] = u → remember who discovered v
+   - q.push(v) → add for further exploration
+4. After BFS is complete → fill routing table row
+
+### run_dijkstra
+Prepare arrays for Dijkstra
+```
+vector<long> d(vertexCount, INF), p(vertexCount, -1);
+```
+Create an ascending priority queue
+```
+priority_queue<pair<long,long>, vector<pair<long,long>>, greater<pair<long,long>>> pq;
+```
+which, each element is: `(current_distance, node_id)` <br>
+The Dijkstra loop:
+1. u = pq.top().second → pick node with minimum cost so far
+2. Explore all neighbors of u
+   ```
+   for(size_t i=0; i<adjList[u].size(); i++){
+    long v = adjList[u][i].first;
+    long w = adjList[u][i].second;
+   ```
+4. Check is_active[v] && d[u] + w < d[v] → only process neighbors that are  && found a cheaper path to reach v
+   ```
+   d[v] = d[u] + w;
+   p[v] = u;
+   pq.push(make_pair(d[v], v));
+   ```
+   - d[v] = d[u] + w → update new best distance
+   - p[v] = u → store u as the parent of v
+   - pq.push(make_pair(d[v], v)) → pushing the improved distance into queue
+After Dijkstra is complete → fill routing table row
+1. tables[start][i].first = d[i] → store minimum cost from start to i
+2. tables[start][i].second = get_next_hop(start, i, p) → use the parent array to reconstruct
