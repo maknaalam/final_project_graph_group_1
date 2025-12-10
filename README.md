@@ -294,5 +294,42 @@ vector<vector<pair<long, long>>> tables;
         (4,5)   // to 5 cost 4
   ]
   ```
-  Why they look structurally different? Because table is always full while    adjList is able to have different spaces
+  Why they look structurally different? Because table is always full while    adjList able to have different spaces
+### init
+Purpose:
+- to make V initial rows for the edges to be filled:
+  ```
+  adjList.resize(v);
+  ```
+- to initiate V × V matrix for routing table: <br>
+  The initiation as {0, 0}
+  ```
+  tables.resize(v, vector<pair<long, long>>(v));
+  ```
+  Setting the hop to itself by {0, i}
+  ```
+  if (i == j) {
+    tables[i][j] = make_pair((long)0, (long)i);
+  }
+  ```
+  So:
+    ```
+    tables[0][0] = {0, 0}
+    tables[1][1] = {0, 1}
+    tables[2][2] = {0, 2}
+    ```
+  Else (i != j) → unreachable at the start
+  ```
+  tables[i][j] = make_pair(INF, (long)-1);
+  ```
+  So:
+    ```
+    tables[0][1] = {INF, -1}
+    tables[0][2] = {INF, -1}
+    tables[1][0] = {INF, -1}
+    tables[2][0] = {INF, -1}
+    ...
+    ```
+    
+
 - a
