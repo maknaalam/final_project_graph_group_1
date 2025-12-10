@@ -346,6 +346,7 @@ Example:
     - p[2] = 1 <br>
     - ... <br>
     means the path is: 0 → 1 → 2 → 3 → 4 <br>
+    which is `p[child] = parent`
 What you'll return is the next hop
 
 ```cpp
@@ -367,3 +368,12 @@ curr = p[p[p[target]]]
 ```
 
 Because `const vector<long>& p` acts as a reference to the local variable that the reference gets passed on.
+
+### calculate_path_weight
+Follow the parents (p) from target → start; just as get_next_hop function. <br>
+Conditions:
+- If start == target → cost is 0
+- If p[target] = -1 → target unreachable
+- If p[curr] = -1 in while (curr != start) → target unreachable
+- If parent adjList met the connection with the child → take the value to check the validity even more before returning the value
+
