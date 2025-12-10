@@ -272,7 +272,6 @@ vector<vector<pair<long, long>>> tables;
       [ (5,2), (4,8) ],      // neighbors of router 2
       ...
   ]
-
   ```
   So: <br>
       - adjList[0] → all connections from router 0 <br>
@@ -331,5 +330,36 @@ Purpose:
     ...
     ```
     
+### get_next_hop
+Variable p → a parent array from a shortest-path algorithm
+```
+p[x] = y
+```
+means: To reach x, you came from y.
+Example:
+    ```
+    p = [0, 0, 1, 2, 3]
+    ```
+    which: <br>
+    - p[0] = 0 <br>
+    - p[1] = 0 <br>
+    - p[2] = 1 <br>
+    - ... <br>
+    means the path is: 0 → 1 → 2 → 3 → 4 <br>
+What you'll return is the next hop
+```
+// -1 (no parent)
+long curr = target;
+while (p[curr] != start && p[curr] != -1) curr = p[curr];
+return curr;
+```
+This loop does:
+    ```
+    curr = target
+    curr = p[target]
+    curr = p[p[target]]
+    curr = p[p[p[target]]]
+    ...
+    ```
+    Because const vector<long>& p act as a reference to the local variable      that the reference get passed on.
 
-- a
