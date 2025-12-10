@@ -337,7 +337,7 @@ p[x] = y
 ```
 means: To reach x, you came from y.
 Example:
-    ```
+    ``` bash
     p = [0, 0, 1, 2, 3]
     ```
     which: <br>
@@ -354,7 +354,7 @@ while (p[curr] != start && p[curr] != -1) curr = p[curr];
 return curr;
 ```
 This loop does:
-    ```
+    ``` bash
     curr = target
     curr = p[target]
     curr = p[p[target]]
