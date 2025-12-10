@@ -274,11 +274,11 @@ vector<vector<pair<long, long>>> tables;
   ]
 
   ```
-  So:
-      - adjList[0] → all connections from router 0
-      - adjList[0][0] → the first neighbor of router 0, (1, 5)
-      - adjList[0][0].first → 1 (neighbor)
-      - adjList[0][0].second → 5 (weight)
+  So: <br>
+      - adjList[0] → all connections from router 0 <br>
+      - adjList[0][0] → the first neighbor of router 0, (1, 5) <br>
+      - adjList[0][0].first → 1 (neighbor) <br>
+      - adjList[0][0].second → 5 (weight) <br>
   However, we manage it differently for the routing table:
   ```
   tables[u][v] = { cost_to_v , nextHop_from_u }
