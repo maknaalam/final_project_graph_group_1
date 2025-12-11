@@ -54,20 +54,14 @@ struct graph {
         if(node >= 0 && node < vertexCount) is_active[node] = status;
     }
 
-    // =================================================================
-    // FUNGSI BANTUAN 1: Trace Next Hop
-    // =================================================================
     long get_next_hop(long start, long target, const vector<long>& p) {
         if (target == start) return start;
         if (p[target] == -1) return -1;
         long curr = target;
-        while (p[curr] != start && p[curr] != -1) curr = p[curr];
+        while (p[curr] != start && p[curr] != -1) curr = p[curr]; // stop before the condition met
         return curr;
     }
 
-    // =================================================================
-    // FUNGSI BANTUAN 2: Hitung Total Weight dari Jalur Parent
-    // =================================================================
     long calculate_path_weight(long start, long target, const vector<long>& p) {
         if (start == target) return 0;
         if (p[target] == -1) return INF;
@@ -76,12 +70,11 @@ struct graph {
         long curr = target;
 
         while (curr != start) {
-            long prev = p[curr];
+            long prev = p[curr]; // this is the parent
             if (prev == -1) return INF; 
 
             long weight_found = INF;
-            // Loop manual pengganti auto untuk compiler lama
-            for(size_t i=0; i<adjList[prev].size(); i++) {
+            for(size_t i=0; i<adjList[prev].size(); i++) { // check using the parent
                 if (adjList[prev][i].first == curr) {
                     weight_found = adjList[prev][i].second;
                     break;
@@ -93,28 +86,23 @@ struct graph {
             total_cost += weight_found;
             if (total_cost >= INF) return INF;
 
-            curr = prev;
+            curr = prev; // taking the parent means taking the previous node
         }
         return total_cost;
     }
 
-    // =================================================================
     // 1. BFS 
-    // =================================================================
     void run_bfs(long start) {
         if(!is_active[start]) return;
-        vector<long> hops(vertexCount, INF);
         vector<long> p(vertexCount, -1);
         queue<int> q;
 
-        hops[start] = 0; q.push(start);
-
+        q.push(start);
         while(!q.empty()){
             int u = q.front(); q.pop();
             for(size_t i=0; i<adjList[u].size(); i++){
                 int v = adjList[u][i].first;
-                if(is_active[v] && hops[v] == INF){ 
-                    hops[v] = hops[u] + 1; 
+                if(is_active[v]){
                     p[v] = u; 
                     q.push(v);
                 }
@@ -128,9 +116,7 @@ struct graph {
         cout << ">>> [BFS] Table ditimpa (Path: Min Hop | Cost: Real Weight).\n";
     }
 
-    // =================================================================
     // 2. DIJKSTRA 
-    // =================================================================
     void run_dijkstra(long start) {
         if(!is_active[start]) return;
         vector<long> d(vertexCount, INF), p(vertexCount, -1);
@@ -163,9 +149,7 @@ struct graph {
         cout << ">>> [DIJKSTRA] Table ditimpa (Path: Min Cost | Cost: Real Weight).\n";
     }
 
-    // =================================================================
     // 3. BELLMAN-FORD / RIP 
-    // =================================================================
     bool run_rip_step() {
         bool changed = false;
         vector<vector<pair<long, long> > > old = tables; 
@@ -201,10 +185,28 @@ struct graph {
 
 int main(){
     graph g;
-    g.init(6); // Inisialisasi 6 node
-    g.add_edge(0, 1, 2); g.add_edge(0, 5, 4);
-    g.add_edge(1, 3, 9); g.add_edge(5, 3, 2);
-    g.add_edge(3, 4, 1); g.add_edge(3, 2, 5);
+    graph g;
+    long V, E;
+    
+    cout << "Masukkan jumlah vertex: ";
+    cin >> V;
+
+    cout << "Masukkan jumlah edge: ";
+    cin >> E;
+
+    g.init(V);
+
+    cout << "Masukkan edge dalam format: u v w\n";
+    cout << "(u dan v adalah vertex, w adalah weight)\n";
+    for(long i = 0; i < E; i++){
+        long u, v, w;
+        cin >> u >> v >> w;
+        g.add_edge(u, v, w);
+    }
+    // g.init(6); // Inisialisasi 6 node
+    // g.add_edge(0, 1, 2); g.add_edge(0, 5, 4);
+    // g.add_edge(1, 3, 9); g.add_edge(5, 3, 2);
+    // g.add_edge(3, 4, 1); g.add_edge(3, 2, 5);
     
     for(int i=0; i<50; i++) g.run_rip_step();
 
@@ -219,9 +221,6 @@ int main(){
         for(int i=0; i<g.vertexCount; i++) {
             pair<long, long> r = g.tables[my_router][i];
             
-            // Konversi manual to_string (kalau compiler sangat tua & tidak support to_string)
-            // Tapi biasanya C++11 support to_string. Jika error 'to_string' not declared, 
-            // bilang saja, nanti saya ganti pakai stringstream.
             
             string c = (r.first >= INF) ? "INF" : to_string(r.first);
             string n;
@@ -428,6 +427,317 @@ The Dijkstra loop:
    - d[v] = d[u] + w → update new best distance <br>
    - p[v] = u → store u as the parent of v <br>
    - pq.push(make_pair(d[v], v)) → pushing the improved distance into queue <br>
+
 After Dijkstra is complete → fill routing table row
 1. tables[start][i].first = d[i] → store minimum cost from start to i
 2. tables[start][i].second = get_next_hop(start, i, p) → use the parent array to reconstruct
+
+### run_rip_step
+What this do:  <br>
+"Every router u updates its routing table by learning from its neighbors' tables." <br>
+which literally:
+```
+For each router u:
+    For each destination dest:
+        For each neighbor v of u:
+            Compute: u → v → dest
+            If cheaper: update u's table
+```
+First
+```
+changed = false
+```
+→ we will return true if ANY routing table entry gets improved (means: “a change occurred in this iteration”) <br>
+<br>
+Make a COPY of the tables
+```
+vector<vector<pair<long, long> > > old = tables;
+```
+→ RIP must use old tables from neighbors. This matches RIP rule: "use the neighbors’ last advertised table, not their in-progress updates." <br>
+Loops
+1. Outer loop 1 — each router u
+   ```
+   for(long u = 0; u < vertexCount; u++) {
+       if(!is_active[u]) continue;
+   ```
+   → Skip router if inactive
+2. Outer loop 2 — each destination dest
+   ```
+   for(long dest = 0; dest < vertexCount; dest++) {
+    if(u == dest) continue;
+   ```
+   → Skip dest == u because distance to itself is always 0
+3. Inner loop — examine neighbors v of u
+   ```
+   for(size_t i=0; i < adjList[u].size(); i++) {
+       long v = adjList[u][i].first;
+       long w = adjList[u][i].second;
+   ```
+   → w = link weight of edge (u → v)
+4. Compute link cost (in case neighbor is down)
+   ```
+   long link_cost = is_active[v] ? w : INF;
+   ```
+   - If neighbor v is active → cost = w <br>
+   - If v is dead → treat link as unreachable (INF) <br>
+5. Compute total cost using the neighbor’s table
+
+```
+long total_cost = link_cost + old[v][dest].first;
+if (total_cost > INF) total_cost = INF;
+```
+
+Remember that:
+
+```
+adjList[u]                  → list of neighbors of u
+adjList[u][i].first        → neighbor node v
+adjList[u][i].second       → cost(u → v)
+```
+
+and
+
+```
+tables[u][dest].first      → cost(u → dest)
+tables[u][dest].second     → next hop from u toward dest
+```
+
+Think of it like this:
+
+```
+u ───(link cost)──▶ v ───(v's known cost to dest)──▶ dest
+```
+
+- The link between u and v:
+
+    ```
+    1 ── cost = 3 ──▶ 2
+    ```
+
+- v knows about reaching destination 7:
+
+    ```
+    2 → 7 costs 5
+    ```
+
+  meaning:
+
+```
+old[2][7] = (5, nextHopTo7)
+  ↑
+.first
+```
+
+---
+
+6. Compare with current table — improvement check
+
+```
+if (total_cost < tables[u][dest].first) {
+    tables[u][dest] = make_pair(total_cost, v);
+    changed = true;
+}
+```
+
+What we're going to implement:
+
+Imagine 4 routers:
+
+```
+0 --(1)-- 1 --(1)-- 2 --(1)-- 3
+```
+
+- **Iteration 1**: Router 0 asks neighbor 1:
+
+    ```
+    0 → 1 = 1
+    1 → 2 = 1
+    So maybe 0 → 2 = 1 + 1 = 2
+    ```
+
+- **Iteration 2**: Router 0 asks neighbor 1 again:
+
+    ```
+    0 → 1 = 1
+    1 → 3 = 2  (found last time)
+    So maybe 0 → 3 = 1 + 2 = 3
+    ```
+
+So little by little, routers learn distances across the network.
+
+7. Second condition: route via v is outdated
+
+```
+else if (tables[u][dest].second == v && total_cost != tables[u][dest].first) {
+    tables[u][dest].first = total_cost;
+    changed = true;
+}
+```
+
+`tables[u][dest].second == v && total_cost != tables[u][dest].first`  
+→ The cost to reach `dest` **through v** changed.
+
+Example:
+
+Before:
+
+```
+1 → 3 → 7 cost = 12
+```
+
+But now neighbor 3 says its cost to 7 changed:
+
+```
+new total cost = 15   (for example)
+```
+
+So:
+
+```
+total_cost (15) != tables[1][7].first (12)
+```
+
+Which means:
+
+- cost is different than before  
+- the route is outdated  
+
+---
+
+# HOW COUNT-TO-INFINITY HAPPENS
+
+```
+A —1— B —1— C
+```
+
+Router C suddenly goes down.
+
+---
+
+🟦 **Step 1 — B notices C is down**
+
+So B sets:
+
+```
+B → C = INF
+```
+
+But A does NOT know this yet.
+
+---
+
+🟦 **Step 2 — A sends its old table to B**
+
+A still believes:
+
+```
+A → C cost = 2 via B
+```
+
+And RIP rule says:
+
+```
+Distance(B→C) = weight(B→A) + Distance(A→C)
+```
+
+So B computes:
+
+```
+B → C = 1 + 2 = 3
+```
+
+B says:
+
+```
+“Oh, A thinks C is reachable!
+I guess I can reach C through A.”
+```
+
+Even though both routes go through each other → **LOOP**.
+
+---
+
+🟥 **Step 3 — B updates its table**
+
+```
+B → C = 3 via A
+```
+
+---
+
+🟦 **Step 4 — A receives B’s update**
+
+A sees:
+
+```
+B → C = 3
+```
+
+So A computes:
+
+```
+A → C = 1 + 3 = 4
+```
+
+Now:
+
+```
+A → C = 4 via B
+```
+
+---
+
+# 🟥 The Loop Continues
+
+Next update:
+
+B sees A → C = 4:
+
+```
+B → C = 1 + 4 = 5
+```
+
+Then A sees B → C = 5:
+
+```
+A → C = 1 + 5 = 6
+```
+
+This keeps going:
+
+```
+3
+4
+5
+6
+7
+8
+...
+16
+∞
+```
+
+This is the **Count-to-Infinity problem**.  
+RIP increments route costs one hop at a time until reaching INF.
+
+---
+
+# 🟥 Which part of YOUR CODE causes it?
+
+This part:
+
+```
+long total_cost = link_cost + old[v][dest].first;
+if (total_cost > INF) total_cost = INF;
+```
+
+---
+
+# 🟥 Why does RIP do this?
+
+Because RIP:
+
+- trusts neighbors  
+- does not detect loops  
+- updates cost slowly (1 hop at a time)  
+
