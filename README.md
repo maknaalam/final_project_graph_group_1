@@ -185,7 +185,6 @@ struct graph {
 
 int main(){
     graph g;
-    graph g;
     long V, E;
     
     cout << "Masukkan jumlah vertex: ";
@@ -601,6 +600,21 @@ Which means:
 
 - cost is different than before  
 - the route is outdated  
+
+
+### main
+```
+for(int i=0; i<50; i++) g.run_rip_step();
+```
+This simply means: <br>
+
+`Before showing ANYTHING, run RIP 50 times so the network fully converges.`
+
+Why 50? <br>
+Because in RIP (Distance Vector), routers must exchange tables multiple times (outer loops). <br>
+50 steps = guarantee convergence for most topologies. This is a shortcut so that when the dashboard starts, the routing tables are already stable. <br>
+
+PRINT ALL ROUTERS + STATUS ON/OFF
 
 ---
 
