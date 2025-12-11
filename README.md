@@ -425,9 +425,9 @@ The Dijkstra loop:
    p[v] = u;
    pq.push(make_pair(d[v], v));
    ```
-   - d[v] = d[u] + w → update new best distance
-   - p[v] = u → store u as the parent of v
-   - pq.push(make_pair(d[v], v)) → pushing the improved distance into queue
+   - d[v] = d[u] + w → update new best distance <br>
+   - p[v] = u → store u as the parent of v <br>
+   - pq.push(make_pair(d[v], v)) → pushing the improved distance into queue <br>
 After Dijkstra is complete → fill routing table row
 1. tables[start][i].first = d[i] → store minimum cost from start to i
 2. tables[start][i].second = get_next_hop(start, i, p) → use the parent array to reconstruct
